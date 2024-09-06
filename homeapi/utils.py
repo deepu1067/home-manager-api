@@ -37,14 +37,18 @@ def read_data():
     return result.get('values', [])
 
 
-def add_data(data, day):
+def add_data(data):
     service  = get_service()
     range_ = f'main!A{day+1}:G{day+1}'
     value_input_option = 'RAW'
     insert_data_option = 'INSERT_ROWS'
 
+    data = [int(x) for x in data]
+    
     body = {
-        'values': [data]
+        'values': [
+                [day] + data
+            ]
     }
 
     result = service.values().append(
@@ -54,5 +58,7 @@ def add_data(data, day):
         insertDataOption=insert_data_option,
         body=body
     ).execute()
+
+    print(result)
 
 
