@@ -44,28 +44,37 @@ def get_user(user):
     return -1
 
 
-# Read Operation
 def read_data():
+    # reading the 'main' sheet
     service = get_service()
     range_ = f"main!A2:G{days_in_month+1}"
     result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
     return result.get("values", [])
 
 
-def add_data_meal(data, day=None):
+def read_data_given():
+    # reading the 'given' sheet
+    service = get_service()
+    range_ = f"given!A2:G{days_in_month+1}"
+    result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+    return result.get("values", [])
+
+
+def add(data, sheet, day=None):
+    # inserting data to the sheet
     service = get_service()
 
     if day is None:
         day = current_day
 
-    range_ = f"main!A{day+1}:G{day+1}"
+    range_ = f"{sheet}!A{day+1}:G{day+1}"
 
     result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
 
     if "values" in result and result["values"]:
         return {
             "status": "error",
-            "message": "Data exists. Proceed to 'update/' if needed",
+            "message": "Data exists",
         }
 
     data = [int(x) for x in data]
@@ -88,7 +97,8 @@ def add_data_meal(data, day=None):
     return {"status": "success", "message": "Data appended successfully."}
 
 
-def update_data_meal(data, day, user):
+def update_data(data, day, user, sheet):
+    # updaing sheet data
     service = get_service()
 
     data = [int(x) for x in data]
@@ -99,7 +109,8 @@ def update_data_meal(data, day, user):
         return {"status": "failed", "message": "User not found"}
 
     index = get_user(user) + 65
-    range_ = f"main!{chr(index)}{day+1}:{chr(index)}{day+1}"
+    range_ = f"{sheet}!{chr(index)}{day+1}:{chr(index)}{day+1}"
+    print(range_)
 
     result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
 
@@ -121,6 +132,7 @@ def update_data_meal(data, day, user):
 
 
 def delete_row(day, sheet):
+    # deleting row for a given day and name of the sheet
     service = get_service()
     range_ = f"{sheet}!A{day+1}:G{day+1}"
     print(range_)
@@ -129,71 +141,19 @@ def delete_row(day, sheet):
     if "values" not in result or not result["values"]:
         return {"status": "failed", "message": "No data found"}
 
-    result = service.values().clear(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
-    
-    return {"status": "success", "message": "Deleted Successfully"}
-
-
-def add_given(data, day=None):
-    service = get_service()
-
-    if day is None:
-        day = current_day
-
-    range_ = f"given!A{day+1}:G{day+1}"
-    print(range_)
-
-    result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
-
-    if "values" in result and result["values"]:
-        return {"status": "failed", "message": "Data already exists"}
-
-    data = [int(x) for x in data]
-
-    body = {"values": [[day] + data]}
-
-    value_input_option = "RAW"
-    insert_data_option = "INSERT_ROWS"
     result = (
-        service.values()
-        .append(
-            spreadsheetId=SPREADSHEET_ID,
-            range=range_,
-            valueInputOption=value_input_option,
-            insertDataOption=insert_data_option,
-            body=body,
-        )
-        .execute()
+        service.values().clear(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
     )
 
-    return {"status": "success", "message": "Data appended successfully."}
+    return {"status": "success", "message": "Deleted Successfully"}
 
-
-def update_given(data, day, user):
+def get_total(user, sheet):
     service = get_service()
     if get_user(user) == -1:
         return {"status": "failed", "message": "User not found"}
 
     index = get_user(user) + 65
-    range_ = f"given!{chr(index)}{day+1}:{chr(index)}{day+1}"
-
+    range_ = f"{sheet}!{chr(index)}34"
     result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
 
-    if "values" not in result or not result["values"]:
-        return {"status": "failed", "message": "No data found"}
-    data = [int(x) for x in data]
-
-    body = {"values": [data]}
-
-    result = (
-        service.values()
-        .update(
-            spreadsheetId=SPREADSHEET_ID,
-            range=range_,
-            valueInputOption="RAW",
-            body=body,
-        )
-        .execute()
-    )
-
-    return {"status": "success", "message": "Updated Successfully"}
+    return {"status": "success", "message": result.get("values", [])}

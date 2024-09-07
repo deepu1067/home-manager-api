@@ -1,28 +1,23 @@
 from django.urls import path
 from .views import (
     ListData,
-    CreateRowMeal,
-    UpdateRowMeal,
+    CreateRow,
+    UpdateRow,
     DeleteRow,
-    CreateRowGiven,
-    UpdateRowGiven,
+    ListDataGiven,
+    GetTotal,
 )
 
 urlpatterns = [
-    path("", ListData.as_view(), name="list_data"),
-    path("add/", CreateRowMeal.as_view(), name="create_row"),
-    path("add/<int:day>/", CreateRowMeal.as_view(), name="create_row_with_day"),
-    path("update/<int:day>/<str:user>/", UpdateRowMeal.as_view(), name="update_row"),
+    path("", ListData.as_view(), name="mainSheetData"),
+    path("given/", ListDataGiven.as_view(), name="givenSheetData"),
+    path("add/<str:sheet>/", CreateRow.as_view(), name="create_row"),
+    path("add/<int:day>/<str:sheet>/", CreateRow.as_view(), name="create_row_with_day"),
+    path(
+        "update/<int:day>/<str:user>/<str:sheet>/",
+        UpdateRow.as_view(),
+        name="update_row",
+    ),
     path("delete/<int:day>/<str:sheet>/", DeleteRow.as_view(), name="delete_row"),
-    path("add_given/", CreateRowGiven.as_view(), name="create_row_given"),
-    path(
-        "add_given/<int:day>/",
-        CreateRowGiven.as_view(),
-        name="create_row_given_withDay",
-    ),
-    path(
-        "update_given/<int:day>/<str:user>/",
-        UpdateRowGiven.as_view(),
-        name="update_given",
-    ),
+    path("total-meal/<str:user>/<str:sheet>/", GetTotal.as_view(), name="totalMeal"),
 ]
