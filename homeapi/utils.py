@@ -29,10 +29,10 @@ def get_service():
     return service.spreadsheets()
 
 
-def get_user(user):
+def _get_user(user):
     # getting the index of the user
     service = get_service()
-    headings = f"main!A1:G1"
+    headings = f"main!B1:G1"
 
     result = (
         service.values().get(spreadsheetId=SPREADSHEET_ID, range=headings).execute()
@@ -40,8 +40,19 @@ def get_user(user):
     users = [x.lower() for x in result["values"][0]]
 
     if user in users:
-        return users.index(user)
+        return users.index(user) + 1
     return -1
+
+
+def isSheet(sheet):
+    service = get_service()
+
+    result = service.get(spreadsheetId=SPREADSHEET_ID).execute()
+
+    sheets_response = result.get("sheets", [])
+    sheets = [sheet["properties"]["title"] for sheet in sheets_response]
+
+    return True if sheet in sheets else False
 
 
 def read_data():
@@ -60,14 +71,23 @@ def read_data_given():
     return result.get("values", [])
 
 
-def add(data, sheet, day=None):
+def add(data, user, sheet, day=None):
     # inserting data to the sheet
     service = get_service()
 
     if day is None:
         day = current_day
 
-    range_ = f"{sheet}!A{day+1}:G{day+1}"
+    if _get_user(user) == -1:
+        return {"status": "failed", "message": "User not found"}
+
+
+    if not isSheet(sheet):
+        return {"status": "failed", "message": "Invalid sheet name"}
+    
+
+    index = _get_user(user) + 65
+    range_ = f"{sheet}!{chr(index)}{day+1}:{chr(index)}{day+1}"
 
     result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
 
@@ -76,19 +96,15 @@ def add(data, sheet, day=None):
             "status": "error",
             "message": "Data exists",
         }
-
     data = [int(x) for x in data]
 
-    body = {"values": [[day] + data]}
-    value_input_option = "RAW"
-    insert_data_option = "INSERT_ROWS"
+    body = {"values": [data]}
     result = (
         service.values()
-        .append(
+        .update(
             spreadsheetId=SPREADSHEET_ID,
             range=range_,
-            valueInputOption=value_input_option,
-            insertDataOption=insert_data_option,
+            valueInputOption="RAW",
             body=body,
         )
         .execute()
@@ -105,10 +121,13 @@ def update_data(data, day, user, sheet):
 
     body = {"values": [data]}
 
-    if get_user(user) == -1:
+    if _get_user(user) == -1:
         return {"status": "failed", "message": "User not found"}
 
-    index = get_user(user) + 65
+    if not isSheet(sheet):
+        return {"status": "failed", "message": "Invalid sheet name"}
+    
+    index = _get_user(user) + 65
     range_ = f"{sheet}!{chr(index)}{day+1}:{chr(index)}{day+1}"
     print(range_)
 
@@ -134,6 +153,11 @@ def update_data(data, day, user, sheet):
 def delete_row(day, sheet):
     # deleting row for a given day and name of the sheet
     service = get_service()
+
+    if not isSheet(sheet):
+        return {"status": "failed", "message": "Invalid sheet name"}
+    
+
     range_ = f"{sheet}!A{day+1}:G{day+1}"
     print(range_)
     result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
@@ -147,13 +171,45 @@ def delete_row(day, sheet):
 
     return {"status": "success", "message": "Deleted Successfully"}
 
+
 def get_total(user, sheet):
     service = get_service()
-    if get_user(user) == -1:
+    if _get_user(user) == -1:
         return {"status": "failed", "message": "User not found"}
+    
+    if not isSheet(sheet):
+        return {"status": "failed", "message": "Invalid sheet name"}
 
-    index = get_user(user) + 65
+    index = _get_user(user) + 65
     range_ = f"{sheet}!{chr(index)}34"
     result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
 
     return {"status": "success", "message": result.get("values", [])}
+
+
+def get_user():
+    service = get_service()
+
+    range_ = "main!B1:G1"
+
+    result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+    return result.get("values", [])
+
+
+def get_list(user, sheet):
+    service = get_service()
+
+    if _get_user(user) == -1:
+        return {"status": "failed", "message": "User not found"}
+
+    if not isSheet(sheet):
+        return {"status": "failed", "message": "Invalid sheet name"}
+
+    index = _get_user(user) + 65
+    range_ = f"{sheet}!{chr(index)}2:{chr(index)}{current_day+1}"
+
+    # print(isSheet(sheet))
+
+    result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+
+    return result.get("values", [])

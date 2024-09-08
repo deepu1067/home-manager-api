@@ -2,7 +2,16 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import GoogleSheetRowSerializer
-from .utils import read_data, add, update_data, delete_row, read_data_given, get_total
+from .utils import (
+    read_data,
+    add,
+    update_data,
+    delete_row,
+    read_data_given,
+    get_total,
+    get_user,
+    get_list,
+)
 
 
 class ListData(generics.ListAPIView):
@@ -32,10 +41,12 @@ class CreateRow(generics.CreateAPIView):
 
     serializer_class = GoogleSheetRowSerializer
 
-    def post(self, request, sheet, day=None, *args, **kwargs):
+    def post(self, request, user, sheet, day=None, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            result = add(serializer.validated_data["values"], sheet=sheet, day=day)
+            result = add(
+                serializer.validated_data["values"], user=user, sheet=sheet, day=day
+            )
             if result["status"] == "success":
                 return Response(result, status=status.HTTP_201_CREATED)
             else:
@@ -76,4 +87,22 @@ class GetTotal(generics.ListAPIView):
 
     def get(self, request, user, sheet, *args, **kwargs):
         result = get_total(user, sheet)  # Fetch the data from Google Sheets
+        return Response({"values": result}, status=status.HTTP_200_OK)
+
+
+class GetAllUsers(generics.ListAPIView):
+    serializer_class = GoogleSheetRowSerializer
+
+    def get(self, request, *args, **kwargs):
+        result = get_user()
+
+        return Response({"values": result}, status=status.HTTP_200_OK)
+
+
+class GetUserMeal(generics.ListAPIView):
+    serializer_class = GoogleSheetRowSerializer
+
+    def get(self, request, user, sheet, *args, **kwargs):
+        result = get_list(user, sheet)
+
         return Response({"values": result}, status=status.HTTP_200_OK)
