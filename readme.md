@@ -1,6 +1,6 @@
 # Writing the README.md file for the user's Django API
 
-readme_content = """
+The spreadsheet should have 2 main sheets. First sheet is for meal calculation and another is for cost of bazar done by an individual
 
 # Home API
 
