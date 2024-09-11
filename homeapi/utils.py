@@ -175,16 +175,23 @@ def delete_row(day, sheet):
 def get_total(user=None):
     service = get_service()
 
+    users = get_user()[0]
+    print(users)
     if user is None:
         range_ = "main!B34:G34"
-        total_meal = sum(sum(int(x) for x in row) for row in service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute().get("values", []))
+        meal = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+        total_meal = sum(sum(int(x) for x in row) for row in meal.get("values", []))
 
         range_ = "given!B34:G34"
-        total_given = sum(sum(int(x) for x in row) for row in service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute().get("values", []))
+        given = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+        total_given = sum(sum(int(x) for x in row) for row in given.get("values", []))
 
         result = {
-            "meal": total_meal,
-            "given": total_given,
+            "users": users,
+            "meal": meal.get("values", []),
+            "given": given.get("values", []),
+            "totalmeal": total_meal,
+            "totalgiven": total_given,
         }
 
         return {"status": "success", "message": result}
