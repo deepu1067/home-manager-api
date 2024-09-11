@@ -31,10 +31,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'homeapi.apps.HomeapiConfig'
+    'homeapi.apps.HomeapiConfig',
+    'corsheaders'
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://192.168.0.111:5173",
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
