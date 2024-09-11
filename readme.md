@@ -84,7 +84,7 @@ This API allows you to perform various CRUD operations and retrieve data from Go
 
 ### 7. **Get Total Meal Count for a User**
 
-- **URL**: `/total-meal/<str:user>/<str:sheet>/`
+- **URL**: `/total-meal/<str:user>/`
 - **Method**: `GET`
 - **Description**: Get the total meal count for a specific user. Or you can get the total meal and total cost of all user
 - **Parameters**:
