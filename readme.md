@@ -86,14 +86,20 @@ This API allows you to perform various CRUD operations and retrieve data from Go
 
 - **URL**: `/total-meal/<str:user>/<str:sheet>/`
 - **Method**: `GET`
-- **Description**: Get the total meal count for a specific user from a specific sheet.
+- **Description**: Get the total meal count for a specific user. Or you can get the total meal and total cost of all user
 - **Parameters**:
   - `user`: The name of the user.
-  - `sheet`: The sheet from which to get the total meal count.
 - **Example**:
   ```bash
-  curl -X GET http://localhost:8000/total-meal/john/Sheet1/
+  curl -X GET http://localhost:8000/total/<str:user>/
   ```
+- **Parameters**:
+  - No user needed
+- **Example**:
+  ```bash
+  curl -X GET http://localhost:8000/total/
+  ```
+
 
 ### 8. **Get All Users**
 

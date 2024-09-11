@@ -172,19 +172,44 @@ def delete_row(day, sheet):
     return {"status": "success", "message": "Deleted Successfully"}
 
 
-def get_total(user, sheet):
+def get_total(user=None):
     service = get_service()
+
+    if user is None:
+        range_ = "main!B34:G34"
+        total_meal = sum(sum(int(x) for x in row) for row in service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute().get("values", []))
+
+        range_ = "given!B34:G34"
+        total_given = sum(sum(int(x) for x in row) for row in service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute().get("values", []))
+
+        result = {
+            "meal": total_meal,
+            "given": total_given,
+        }
+
+        return {"status": "success", "message": result}
+
+
+    user = user.lower()
+
     if _get_user(user) == -1:
         return {"status": "failed", "message": "User not found"}
-    
-    if not isSheet(sheet):
-        return {"status": "failed", "message": "Invalid sheet name"}
 
     index = _get_user(user) + 65
-    range_ = f"{sheet}!{chr(index)}34"
-    result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
 
-    return {"status": "success", "message": result.get("values", [])}
+    range_ = f"main!{chr(index)}34"
+    meal = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+    
+
+    range_ = f"given!{chr(index)}34"
+    given = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+    
+    result = {
+        "meal": meal.get("values", []),
+        "given": given.get("values", []),
+    }
+
+    return {"status": "success", "message": result}
 
 
 def get_user():
