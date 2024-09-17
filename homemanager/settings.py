@@ -1,4 +1,5 @@
 from pathlib import Path
+import socket
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -18,6 +19,16 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Connect to a remote server, this doesn't actually send any data
+        s.connect(('8.8.8.8', 80))
+        local_ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return local_ip
+
 ALLOWED_HOSTS = ["*"]
 
 
@@ -35,12 +46,18 @@ INSTALLED_APPS = [
     'corsheaders'
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://192.168.0.111:5173",
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://192.168.0.111:5173",
+#     "http://localhost:5173",
+#     "http://127.0.0.1:5173",
+# ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    # 'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
