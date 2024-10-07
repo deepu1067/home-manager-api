@@ -10,7 +10,7 @@ load_dotenv()  # loading .env file
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
-GOOGLE_CREDINTIALS = json.loads(os.getenv("GOOGLE_CREDINTIALS"))
+GOOGLE_CREDINTIALS = json.load(open("secrets.json"))
 
 now = datetime.now()
 year = now.year
@@ -81,10 +81,8 @@ def add(data, user, sheet, day=None):
     if _get_user(user) == -1:
         return {"status": "failed", "message": "User not found"}
 
-
     if not isSheet(sheet):
         return {"status": "failed", "message": "Invalid sheet name"}
-    
 
     index = _get_user(user) + 65
     range_ = f"{sheet}!{chr(index)}{day+1}:{chr(index)}{day+1}"
@@ -126,7 +124,7 @@ def update_data(data, day, user, sheet):
 
     if not isSheet(sheet):
         return {"status": "failed", "message": "Invalid sheet name"}
-    
+
     index = _get_user(user) + 65
     range_ = f"{sheet}!{chr(index)}{day+1}:{chr(index)}{day+1}"
     print(range_)
@@ -156,9 +154,8 @@ def delete_row(day, sheet):
 
     if not isSheet(sheet):
         return {"status": "failed", "message": "Invalid sheet name"}
-    
 
-    range_ = f"{sheet}!A{day+1}:G{day+1}"
+    range_ = f"{sheet}!B{day+1}:G{day+1}"
     print(range_)
     result = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
 
@@ -179,11 +176,15 @@ def get_total(user=None):
     print(users)
     if user is None:
         range_ = "main!B34:G34"
-        meal = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+        meal = (
+            service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+        )
         total_meal = sum(sum(int(x) for x in row) for row in meal.get("values", []))
 
         range_ = "given!B34:G34"
-        given = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+        given = (
+            service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
+        )
         total_given = sum(sum(int(x) for x in row) for row in given.get("values", []))
 
         result = {
@@ -196,7 +197,6 @@ def get_total(user=None):
 
         return {"status": "success", "message": result}
 
-
     user = user.lower()
 
     if _get_user(user) == -1:
@@ -206,11 +206,10 @@ def get_total(user=None):
 
     range_ = f"main!{chr(index)}34"
     meal = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
-    
 
     range_ = f"given!{chr(index)}34"
     given = service.values().get(spreadsheetId=SPREADSHEET_ID, range=range_).execute()
-    
+
     result = {
         "meal": meal.get("values", []),
         "given": given.get("values", []),
@@ -238,7 +237,7 @@ def get_list(user, sheet):
         return {"status": "failed", "message": "Invalid sheet name"}
 
     index = _get_user(user) + 65
-    range_ = f"{sheet}!{chr(index)}2:{chr(index)}{current_day+1}"
+    range_ = f"{sheet}!{chr(index)}2:{chr(index)}{days_in_month}"
 
     # print(isSheet(sheet))
 
