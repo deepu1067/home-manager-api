@@ -25,7 +25,8 @@ urlpatterns = [
         name="update_row",
     ),
     path("delete/<int:day>/<str:sheet>/", DeleteRow.as_view(), name="delete_row"),
-    path("total-meal/<str:user>/<str:sheet>/", GetTotal.as_view(), name="totalMeal"),
+    path("total/<str:user>/", GetTotal.as_view(), name="totalEachUser"),
+    path("total/", GetTotal.as_view(), name="total"),
     path("users/", GetAllUsers.as_view(), name="all_users"),
     path("get/<str:user>/<str:sheet>/", GetUserMeal.as_view(), name="get_user_meal"),
 ]

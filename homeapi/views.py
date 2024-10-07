@@ -85,8 +85,8 @@ class DeleteRow(generics.DestroyAPIView):
 class GetTotal(generics.ListAPIView):
     serializer_class = GoogleSheetRowSerializer
 
-    def get(self, request, user, sheet, *args, **kwargs):
-        result = get_total(user, sheet)  # Fetch the data from Google Sheets
+    def get(self, request, user=None, *args, **kwargs):
+        result = get_total(user)  # Fetch the data from Google Sheets
         return Response({"values": result}, status=status.HTTP_200_OK)
 
 
