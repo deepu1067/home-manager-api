@@ -10,7 +10,8 @@ load_dotenv()  # loading .env file
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
-GOOGLE_CREDINTIALS = json.load(open("secrets.json"))
+# GOOGLE_CREDINTIALS = json.load(open("secrets.json"))
+GOOGLE_CREDINTIALS = json.loads(os.getenv("GOOGLE_CREDINTIALS"))
 
 now = datetime.now()
 year = now.year
